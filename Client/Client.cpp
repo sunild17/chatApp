@@ -42,8 +42,8 @@ Client::Client(string name, string ip, int port)
     string msg = "";
     cout <<"enter message to send"<<endl;
     cin >> msg;
-    send(msg);
-    receive();
+    t_send = new thread([this,msg](){this->send(msg);});
+    t_receive = new thread([this]() { this->receive(); });
 }
 
 bool Client::ClientopenConnection(string address) {
@@ -81,7 +81,7 @@ void Client::send(string msg)
 }
 void Client::receive()
 {
-    char * buffer[1024];
+    char buffer[1024];
     socklen_t serverAddrLen = sizeof(serverAddr);
     memset(buffer, 0, 1024);
     int bytesReceived = recvfrom(sockfd, buffer, 1024, 0,
@@ -96,7 +96,7 @@ void Client::receive()
 
 Client::~Client()
 {
-    // t_send->join();
-    // t_receive->join(); 
+    t_send->join();
+    t_receive->join(); 
     close(sockfd);
 }
